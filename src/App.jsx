@@ -50,18 +50,35 @@
 //export default App;
 
 import React from "react";
-import { BookingForm } from "./components//BookingForm";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BookingForm } from "./components/BookingForm";
+import Footer from "./components/Footer";
 
 const App = () => {
   const handleBookingSubmit = (formData) => {
     console.log("Booking Submitted:", formData);
-    // You can later send this data to your backend using fetch or axios
+    // You can send data to your backend here
   };
 
   return (
-    <div className="min-h-screen bg-dark-900 text-white p-6">
-      <BookingForm onSubmit={handleBookingSubmit} />
-    </div>
+    <Router>
+      <div className="min-h-screen bg-dark-900 text-white p-6">
+        {/* Navigation Links */}
+        <nav className="mb-8 text-center space-x-6">
+          <Link to="/" className="hover:underline text-blue-400">Booking</Link>
+          <Link to="/footer" className="hover:underline text-blue-400">Footer</Link>
+        </nav>
+
+        {/* Page Routes */}
+        <Routes>
+          <Route
+            path="/"
+            element={<BookingForm onSubmit={handleBookingSubmit} />}
+          />
+          <Route path="/footer" element={<Footer />} />
+        </Routes>
+      </div>
+    </Router>
   );
 };
 
