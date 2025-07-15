@@ -34,18 +34,35 @@
 
 // export default App
 
-// App.jsx
+// // App.jsx
+// import React from "react";
+// import NotificationSettings from "./Components/NotificationSettings";
+// import './index.css'
+
+// const App = () => {
+//   return (
+//     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+//       <NotificationSettings />
+//     </div>
+//   );
+// };
+//
+//export default App;
+
 import React from "react";
-import NotificationSettings from "./Components/NotificationSettings";
-import './index.css'
+import { BookingForm } from "./components//BookingForm";
 
 const App = () => {
+  const handleBookingSubmit = (formData) => {
+    console.log("Booking Submitted:", formData);
+    // You can later send this data to your backend using fetch or axios
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <NotificationSettings />
+    <div className="min-h-screen bg-dark-900 text-white p-6">
+      <BookingForm onSubmit={handleBookingSubmit} />
     </div>
   );
 };
 
 export default App;
-
