@@ -53,11 +53,12 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { BookingForm } from "./components/BookingForm";
 import Footer from "./components/Footer";
+import Header from "./components/Header";
+import Hero from "./components/Hero";
 
 const App = () => {
   const handleBookingSubmit = (formData) => {
     console.log("Booking Submitted:", formData);
-    // You can send data to your backend here
   };
 
   return (
@@ -65,12 +66,19 @@ const App = () => {
       <div className="min-h-screen bg-dark-900 text-white p-6">
         {/* Navigation Links */}
         <nav className="mb-8 text-center space-x-6">
+          <Link to="/home" className="hover:underline text-blue-400">Home</Link>
           <Link to="/" className="hover:underline text-blue-400">Booking</Link>
           <Link to="/footer" className="hover:underline text-blue-400">Footer</Link>
         </nav>
 
         {/* Page Routes */}
         <Routes>
+          <Route path="/home" element={
+            <>
+              <Header />
+              <Hero />
+            </>
+          } />
           <Route
             path="/"
             element={<BookingForm onSubmit={handleBookingSubmit} />}
