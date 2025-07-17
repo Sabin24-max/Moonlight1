@@ -13,7 +13,7 @@ const RoomCard = ({ room, onBook }) => {
   
   return (
     <div className="group relative bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-500 hover:scale-105 border border-slate-700/50">
-      {/* Heart Icon */}
+      
       <div className="absolute top-4 left-4 z-10">
         <button className="p-2 bg-black/30 backdrop-blur-sm rounded-full hover:bg-black/50 transition-colors">
           <Heart className="h-4 w-4 text-white hover:text-red-400" />
@@ -28,13 +28,13 @@ const RoomCard = ({ room, onBook }) => {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         
-        {/* Price Badge */}
+        
         <div className="absolute top-4 right-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
           ${room.price}
           <span className="text-xs opacity-90">/night</span>
         </div>
         
-        {/* Location Badge */}
+       
         <div className="absolute bottom-4 left-4 flex items-center space-x-1 bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full">
           <MapPin className="h-3 w-3 text-white" />
           <span className="text-white text-xs">{room.location || 'Prime Location'}</span>
@@ -79,7 +79,7 @@ const RoomCard = ({ room, onBook }) => {
   );
 };
 
-// Demo component with only Cozy Mountain Cabin
+
 export default function RoomCardDemo() {
   const room = {
     id: 2,
