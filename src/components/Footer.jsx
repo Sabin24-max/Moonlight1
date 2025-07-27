@@ -1,4 +1,4 @@
-// src/components/Footer.jsx
+
 import React from 'react';
 import {
   Moon,
@@ -31,7 +31,7 @@ export const Footer = () => {
             </div>
           </div>
 
-          {/* Quick Links */}
+          
           <div>
             <h3 className="text-white font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
@@ -42,7 +42,7 @@ export const Footer = () => {
             </ul>
           </div>
 
-          {/* Services */}
+         
           <div>
             <h3 className="text-white font-semibold mb-4">Services</h3>
             <ul className="space-y-2">
@@ -53,7 +53,7 @@ export const Footer = () => {
             </ul>
           </div>
 
-          {/* Contact Info */}
+          
           <div>
             <h3 className="text-white font-semibold mb-4">Contact Info</h3>
             <div className="space-y-3">
@@ -73,7 +73,7 @@ export const Footer = () => {
           </div>
         </div>
 
-        {/* Footer Bottom */}
+       
         <div className="border-t border-dark-700 mt-8 pt-8 text-center">
           <p className="text-gray-400">
             &copy; {new Date().getFullYear()} Moonlight Hotel. All rights reserved.
