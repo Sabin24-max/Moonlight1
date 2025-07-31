@@ -1,11 +1,23 @@
-import mongoose from 'mongoose';
+export default (sequelize, DataTypes) => {
+  const Booking = sequelize.define('Booking', {
+    checkIn: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    checkOut: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.STRING,
+      defaultValue: 'confirmed',
+    },
+  });
 
-const bookingSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  room: { type: mongoose.Schema.Types.ObjectId, ref: 'Room' },
-  checkIn: Date,
-  checkOut: Date,
-  status: { type: String, default: 'confirmed' }
-});
+  Booking.associate = (models) => {
+    Booking.belongsTo(models.User, { foreignKey: 'userId' });
+    Booking.belongsTo(models.Room, { foreignKey: 'roomId' });
+  };
 
-export default mongoose.model('Booking', bookingSchema);
+  return Booking;
+};
