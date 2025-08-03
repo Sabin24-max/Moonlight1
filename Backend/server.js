@@ -15,25 +15,36 @@ import { errorHandler } from './middleware/errorMiddleware.js';
 
 const app = express();
 
-// Middleware for CORS and JSON body parsing
-app.use(cors());
+// Middleware for JSON parsing and CORS
 app.use(express.json());
 
-// Register API routes with appropriate base paths
+// ✅ Enable CORS for frontend (React Vite)
+app.use(cors({
+  origin: 'http://localhost:5173', // Update this if frontend is hosted elsewhere
+  credentials: true,
+}));
+
+// API Route registration
 app.use('/api/auth', authRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/contact', contactRoutes);
 
-// Centralized error handling middleware
+// Optional: Handle undefined routes
+app.use((req, res, next) => {
+  res.status(404).json({ message: 'API endpoint not found' });
+});
+
+// Centralized error handler
 app.use(errorHandler);
 
-// Start server after successful DB sync
+// Start server after DB connection
 const PORT = process.env.PORT || 5000;
 
 db.sequelize
   .sync()
   .then(() => {
+    console.log('✅ Database synced successfully');
     app.listen(PORT, () => {
       console.log(`✅ Server is running on http://localhost:${PORT}`);
     });
