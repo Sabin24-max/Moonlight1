@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, Moon } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../components/AuthProvider';
+import { comment } from 'postcss';
 
 export const LoginPage = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -17,14 +18,9 @@ export const LoginPage = () => {
     setErrors({});
 
     const newErrors = {};
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
-    }
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    }
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Invalid email';
+    if (!formData.password) newErrors.password = 'Password is required';
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -32,20 +28,14 @@ export const LoginPage = () => {
       return;
     }
 
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      const userData = {
-        name: formData.email.split('@')[0],
-        email: formData.email,
-        isAuthenticated: true
-      };
-      login(userData);
+    const result = await login(formData.email, formData.password);
+    if (result.success) {
       navigate('/');
-    } catch (error) {
-      setErrors({ general: 'Invalid email or password' });
-    } finally {
-      setIsLoading(false);
+    } else {
+      setErrors({ general: result.message });
     }
+
+    setIsLoading(false);
   };
 
   const handleChange = (e) => {
@@ -56,104 +46,66 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 text-white">
-        <div className="text-center">
-          <Link to="/" className="flex items-center justify-center space-x-2 mb-8">
-            <Moon className="h-12 w-12 text-blue-500" />
-            <span className="text-3xl font-bold">Moonlight</span>
-          </Link>
-          <h2 className="text-3xl font-bold mb-2">Welcome Back</h2>
-          <p className="text-gray-400">Sign in to your account to continue</p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-black text-white px-4">
+      <form onSubmit={handleSubmit} className="bg-zinc-900 p-8 rounded-xl shadow-2xl w-full max-w-md">
+        <h2 className="text-3xl font-bold mb-6 text-center">Login</h2>
 
-        <div className="bg-[#111] rounded-2xl p-8 border border-gray-800 shadow-xl">
-          {errors.general && (
-            <div className="bg-red-800 border border-red-700 rounded-lg p-3 mb-6">
-              <p className="text-red-300 text-sm">{errors.general}</p>
-            </div>
-          )}
+        {errors.general && <p className="text-red-500 text-sm mb-4 text-center">{errors.general}</p>}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block mb-2 font-medium">Email Address</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-3 bg-[#1a1a1a] border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.email ? 'border-red-500' : 'border-gray-700'
-                  }`}
-                  placeholder="Enter your email"
-                />
-              </div>
-              {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
-            </div>
-
-            <div>
-              <label className="block mb-2 font-medium">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className={`w-full pl-10 pr-12 py-3 bg-[#1a1a1a] border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.password ? 'border-red-500' : 'border-gray-700'
-                  }`}
-                  placeholder="Enter your password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-gray-400 hover:text-white transition-colors"
-                >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-              </div>
-              {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
-            </div>
-
-            <div className="flex items-center justify-between">
-              <label className="flex items-center">
-                <input type="checkbox" className="rounded bg-[#1a1a1a] text-blue-500 border-gray-600" />
-                <span className="ml-2 text-sm">Remember me</span>
-              </label>
-              <button type="button" className="text-sm text-blue-400 hover:text-blue-300">
-                Forgot password?
-              </button>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-800 text-white py-3 rounded-lg hover:from-blue-700 hover:to-blue-900 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 shadow-lg"
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Signing In...
-                </div>
-              ) : (
-                'Sign In'
-              )}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-gray-400">
-              Don't have an account?{' '}
-              <Link to="/register" className="text-blue-500 hover:text-blue-300 font-semibold transition-colors">
-                Sign Up
-              </Link>
-            </p>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Email</label>
+          <div className="flex items-center gap-2 bg-zinc-800 p-3 rounded">
+            <Mail className="w-5 h-5 text-gray-400" />
+            <input
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="bg-transparent flex-1 outline-none text-white"
+              placeholder="Enter your email"
+            />
           </div>
+          {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
         </div>
-      </div>
+
+        <div className="mb-6">
+          <label className="block text-sm font-medium mb-1">Password</label>
+          <div className="flex items-center gap-2 bg-zinc-800 p-3 rounded">
+            <Lock className="w-5 h-5 text-gray-400" />
+            <input
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              value={formData.password}
+              onChange={handleChange}
+              className="bg-transparent flex-1 outline-none text-white"
+              placeholder="Enter your password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="text-gray-400"
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
+          </div>
+          {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+          disabled={isLoading}
+        >
+          {isLoading ? 'Logging in...' : 'Login'}
+        </button>
+
+        <p className="text-sm text-center mt-6">
+          Don’t have an account?{' '}
+          <Link to="/register" className="text-blue-400 hover:underline">
+            Register
+          </Link>
+        </p>
+      </form>
     </div>
   );
 };
