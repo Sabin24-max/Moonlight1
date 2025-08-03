@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Eye, EyeOff, Moon } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../components/AuthProvider';
+
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 export const RegisterPage = () => {
   const [formData, setFormData] = useState({
-    name: '',
+    fullName: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -16,6 +18,13 @@ export const RegisterPage = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (errors[e.target.name]) {
+      setErrors({ ...errors, [e.target.name]: '' });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -23,7 +32,7 @@ export const RegisterPage = () => {
 
     const newErrors = {};
 
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
+    if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required';
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
@@ -45,174 +54,136 @@ export const RegisterPage = () => {
     }
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      login({
-        name: formData.name,
-        email: formData.email,
-        isAuthenticated: true
+      const res = await fetch(`${BASE_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+          phone: '0000000000',
+          role: 'user'
+        })
       });
-      navigate('/');
+
+      const data = await res.json();
+
+      if (res.ok) {
+        login({
+          name: data.user.fullName || data.user.name,
+          email: data.user.email,
+          isAuthenticated: true
+        });
+        navigate('/');
+      } else {
+        setErrors({ general: data.message || 'Registration failed' });
+      }
     } catch (error) {
-      setErrors({ general: 'Something went wrong. Please try again.' });
+      console.error('Registration error:', error);
+      setErrors({ general: 'Failed to connect to server' });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    if (errors[e.target.name]) {
-      setErrors({ ...errors, [e.target.name]: '' });
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <Link to="/" className="flex items-center justify-center space-x-2 mb-6">
-            <Moon className="h-10 w-10 text-blue-500" />
-            <span className="text-3xl font-extrabold tracking-tight">Moonlight</span>
-          </Link>
-          <h2 className="text-2xl font-semibold mb-2">Join Moonlight</h2>
-          <p className="text-gray-400">Create your account to start booking</p>
-        </div>
-
-        <div className="bg-gray-900 rounded-xl p-8 border border-gray-700 shadow-lg">
-          {errors.general && (
-            <div className="bg-red-800/50 border border-red-700 rounded-lg p-3 mb-6">
-              <p className="text-red-300 text-sm">{errors.general}</p>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Name */}
-            <div>
-              <label className="block text-sm font-medium mb-1">Full Name</label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Your full name"
-                  className={`w-full pl-10 pr-4 py-3 bg-gray-800 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.name ? 'border-red-500' : 'border-gray-700'
-                  }`}
-                />
-              </div>
-              {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name}</p>}
-            </div>
-
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium mb-1">Email Address</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="example@mail.com"
-                  className={`w-full pl-10 pr-4 py-3 bg-gray-800 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.email ? 'border-red-500' : 'border-gray-700'
-                  }`}
-                />
-              </div>
-              {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
-            </div>
-
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-medium mb-1">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Password"
-                  className={`w-full pl-10 pr-12 py-3 bg-gray-800 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.password ? 'border-red-500' : 'border-gray-700'
-                  }`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-gray-400 hover:text-white"
-                >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-              </div>
-              {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <label className="block text-sm font-medium mb-1">Confirm Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  placeholder="Re-enter password"
-                  className={`w-full pl-10 pr-4 py-3 bg-gray-800 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.confirmPassword ? 'border-red-500' : 'border-gray-700'
-                  }`}
-                />
-              </div>
-              {errors.confirmPassword && <p className="text-red-400 text-sm mt-1">{errors.confirmPassword}</p>}
-            </div>
-
-            {/* Terms */}
-            <div className="flex items-center text-sm">
+    <div className="min-h-screen flex items-center justify-center bg-black text-white px-4">
+      <div className="w-full max-w-md bg-zinc-900 p-8 rounded-2xl shadow-2xl">
+        <h2 className="text-3xl font-bold mb-6 text-center">Create an Account</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Full Name */}
+          <div>
+            <label className="block text-sm mb-1">Full Name</label>
+            <div className="flex items-center border border-gray-700 rounded px-3 py-2 bg-zinc-800">
+              <User className="mr-2" />
               <input
-                type="checkbox"
-                className="rounded border-gray-600 bg-gray-800 text-blue-500 focus:ring-blue-500"
+                type="text"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleChange}
+                className="bg-transparent outline-none w-full text-white"
+                placeholder="Enter your name"
               />
-              <span className="ml-2 text-gray-300">
-                I agree to the{' '}
-                <Link to="/terms" className="text-blue-500 hover:underline">
-                  Terms of Service
-                </Link>{' '}
-                and{' '}
-                <Link to="/privacy" className="text-blue-500 hover:underline">
-                  Privacy Policy
-                </Link>
-              </span>
             </div>
-
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-800 text-white py-3 rounded-lg hover:from-blue-700 hover:to-blue-900 transition-all font-semibold transform hover:scale-105 disabled:opacity-50"
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin h-5 w-5 border-b-2 border-white rounded-full mr-2"></div>
-                  Creating Account...
-                </div>
-              ) : (
-                'Create Account'
-              )}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-gray-400">
-              Already have an account?{' '}
-              <Link to="/login" className="text-blue-500 hover:underline font-medium">
-                Sign In
-              </Link>
-            </p>
+            {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>}
           </div>
-        </div>
+
+          {/* Email */}
+          <div>
+            <label className="block text-sm mb-1">Email</label>
+            <div className="flex items-center border border-gray-700 rounded px-3 py-2 bg-zinc-800">
+              <Mail className="mr-2" />
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="bg-transparent outline-none w-full text-white"
+                placeholder="Enter your email"
+              />
+            </div>
+            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+          </div>
+
+          {/* Password */}
+          <div>
+            <label className="block text-sm mb-1">Password</label>
+            <div className="flex items-center border border-gray-700 rounded px-3 py-2 bg-zinc-800">
+              <Lock className="mr-2" />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="bg-transparent outline-none w-full text-white"
+                placeholder="Enter your password"
+              />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="ml-2 text-white">
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+          </div>
+
+          {/* Confirm Password */}
+          <div>
+            <label className="block text-sm mb-1">Confirm Password</label>
+            <div className="flex items-center border border-gray-700 rounded px-3 py-2 bg-zinc-800">
+              <Lock className="mr-2" />
+              <input
+                type="password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="bg-transparent outline-none w-full text-white"
+                placeholder="Confirm your password"
+              />
+            </div>
+            {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
+          </div>
+
+          {/* General Error */}
+          {errors.general && <p className="text-red-500 text-sm text-center">{errors.general}</p>}
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-blue-600 hover:bg-blue-700 transition-colors py-2 rounded-lg font-semibold"
+          >
+            {isLoading ? 'Registering...' : 'Register'}
+          </button>
+
+          {/* Login Link */}
+          <p className="text-sm text-center mt-4">
+            Already have an account?{' '}
+            <Link to="/login" className="text-blue-400 hover:underline">
+              Login here
+            </Link>
+          </p>
+        </form>
       </div>
     </div>
   );
